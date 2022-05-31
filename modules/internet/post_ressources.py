@@ -1,12 +1,13 @@
 #  Copyright (c) 2022. Esteban Restoy e.restoy24@gmail.com
 
 """System modules"""
-import base64
 import datetime
 import json
 import os
 from os.path import split
 import requests
+
+from modules.internet.common import get_headers_content_type_json, get_headers
 
 SERVER_COMPUTER_URL = os.getenv("WEB_SERVER_URL_COMPUTER_POST")
 SERVER_SCREENSHOT_URL = os.getenv("WEB_SERVER_URL_SCREENSHOT_POST")
@@ -29,11 +30,7 @@ def post_image(image_path: str, computer_id: int):
         files = [
             ('image', (file_name, file, 'image/png'))
         ]
-        headers = {
-            'Authorization': 'Basic ' + base64.b64encode((os.getenv("API_ADMIN_USERNAME") + ":" +
-                                                          os.getenv("API_ADMIN_PASSWORD"))
-                                                         .encode()).decode(),
-        }
+        headers = get_headers()
         print(requests.request("POST",
                                SERVER_SCREENSHOT_URL,
                                headers=headers,
@@ -68,12 +65,7 @@ def create_computer(public_ip: str,
         "last_message_date": str(datetime.datetime.now(datetime.timezone.utc))
     })
 
-    headers = {
-        'Authorization': 'Basic ' + base64.b64encode((os.getenv("API_ADMIN_USERNAME") + ":" +
-                                                      os.getenv("API_ADMIN_PASSWORD"))
-                                                     .encode()).decode(),
-        'Content-Type': 'application/json'
-    }
+    headers = get_headers_content_type_json()
 
     response = requests.request("POST", SERVER_COMPUTER_URL, headers=headers, data=payload)
 

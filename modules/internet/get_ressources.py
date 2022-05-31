@@ -1,20 +1,17 @@
 #  Copyright (c) 2022. Esteban Restoy e.restoy24@gmail.com
 
 """System modules"""
-import base64
 import os
 import shutil
 import requests
+
+from modules.internet.common import get_headers
 
 IMAGE_URL: str = os.getenv("BACKGROUND_IMAGE_URL")
 FILE_NAME = os.getenv("BACKGROUND_IMAGE_NAME")
 WEB_SERVER_URL_COMPUTER_DETAIL_GET: str = os.getenv("WEB_SERVER_URL_COMPUTER_DETAIL_GET")
 
-HEADERS = {
-    'Authorization': 'Basic ' + base64.b64encode((os.getenv("API_ADMIN_USERNAME") + ":" +
-                                                  os.getenv("API_ADMIN_PASSWORD"))
-                                                 .encode()).decode(),
-}
+HEADERS = get_headers()
 
 
 def get_image_from_the_web(url: str = IMAGE_URL):

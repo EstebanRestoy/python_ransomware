@@ -1,12 +1,13 @@
 #  Copyright (c) 2022. Esteban Restoy e.restoy24@gmail.com
 
 """System modules"""
-import base64
 import datetime
 import json
 import os
 
 import requests
+
+from modules.internet.common import get_headers_content_type_json
 
 WEB_SERVER_URL_COMPUTER_DETAIL_GET: str = os.getenv("WEB_SERVER_URL_COMPUTER_DETAIL_GET")
 
@@ -24,12 +25,7 @@ def patch_last_message_date(computer_id: int, date: datetime):
         "last_message_date": str(date),
     })
 
-    headers = {
-        'Authorization': 'Basic ' + base64.b64encode((os.getenv("API_ADMIN_USERNAME") + ":" +
-                                                      os.getenv("API_ADMIN_PASSWORD"))
-                                                     .encode()).decode(),
-        'Content-Type': 'application/json'
-    }
+    headers = get_headers_content_type_json()
 
     response = requests.request("PATCH", WEB_SERVER_URL_COMPUTER_DETAIL_GET +
                                 str(computer_id) + "/", headers=headers,
