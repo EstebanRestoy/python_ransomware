@@ -30,7 +30,7 @@ jobs:
 
       - name: Test with pytest
         run: |
-            pytest
+            python -m pytest
 
       - name: setup pyenv
         id: pyenv_installation
