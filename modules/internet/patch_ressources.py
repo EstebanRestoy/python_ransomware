@@ -1,4 +1,6 @@
 #  Copyright (c) 2022. Esteban Restoy e.restoy24@gmail.com
+
+"""System modules"""
 import base64
 import datetime
 import json
@@ -17,7 +19,6 @@ def patch_last_message_date(computer_id: int, date: datetime):
     :param date: the date now to send to the web server
     :param computer_id: the computer id (stored in config file)
     """
-    global WEB_SERVER_URL_COMPUTER_DETAIL_GET
 
     payload = json.dumps({
         "last_message_date": str(date),
@@ -25,11 +26,13 @@ def patch_last_message_date(computer_id: int, date: datetime):
 
     headers = {
         'Authorization': 'Basic ' + base64.b64encode((os.getenv("API_ADMIN_USERNAME") + ":" +
-                                                      os.getenv("API_ADMIN_PASSWORD")).encode()).decode(),
+                                                      os.getenv("API_ADMIN_PASSWORD"))
+                                                     .encode()).decode(),
         'Content-Type': 'application/json'
     }
 
-    response = requests.request("PATCH", WEB_SERVER_URL_COMPUTER_DETAIL_GET + str(computer_id) + "/", headers=headers,
+    response = requests.request("PATCH", WEB_SERVER_URL_COMPUTER_DETAIL_GET +
+                                str(computer_id) + "/", headers=headers,
                                 data=payload)
 
     json_response = response.json()

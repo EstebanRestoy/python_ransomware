@@ -3,14 +3,11 @@
 """System modules"""
 import ctypes
 import datetime
-import json
 import os
 import platform
 import socket
 import sys
-from os import getcwd
 from os.path import exists
-
 import pyautogui
 from requests import get
 

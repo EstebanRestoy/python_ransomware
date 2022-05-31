@@ -10,6 +10,12 @@ IMAGE_URL: str = os.getenv("BACKGROUND_IMAGE_URL")
 FILE_NAME = os.getenv("BACKGROUND_IMAGE_NAME")
 WEB_SERVER_URL_COMPUTER_DETAIL_GET: str = os.getenv("WEB_SERVER_URL_COMPUTER_DETAIL_GET")
 
+HEADERS = {
+    'Authorization': 'Basic ' + base64.b64encode((os.getenv("API_ADMIN_USERNAME") + ":" +
+                                                  os.getenv("API_ADMIN_PASSWORD"))
+                                                 .encode()).decode(),
+}
+
 
 def get_image_from_the_web(url: str = IMAGE_URL):
     """
@@ -39,17 +45,10 @@ def get_has_paid(computer_id: str):
     :param computer_id: the computer id
     """
 
-    headers = {
-        'Authorization': 'Basic ' + base64.b64encode((os.getenv("API_ADMIN_USERNAME") + ":" +
-                                                      os.getenv("API_ADMIN_PASSWORD")).encode()).decode(),
-    }
-
-    res = requests.get(WEB_SERVER_URL_COMPUTER_DETAIL_GET + str(computer_id) + "/", headers=headers)
+    res = requests.get(WEB_SERVER_URL_COMPUTER_DETAIL_GET + str(computer_id) + "/", headers=HEADERS)
 
     if res.status_code == 200:
         return res.json()["has_paid"]
-    else:
-        print('Error with the server !')
 
     return False
 
@@ -62,16 +61,9 @@ def get_the_decryption_key(computer_id: str):
     :param computer_id: the computer id
     """
 
-    headers = {
-        'Authorization': 'Basic ' + base64.b64encode((os.getenv("API_ADMIN_USERNAME") + ":" +
-                                                      os.getenv("API_ADMIN_PASSWORD")).encode()).decode(),
-    }
-
-    res = requests.get(WEB_SERVER_URL_COMPUTER_DETAIL_GET + str(computer_id), headers=headers)
+    res = requests.get(WEB_SERVER_URL_COMPUTER_DETAIL_GET + str(computer_id), headers=HEADERS)
 
     if res.status_code == 200:
         return res.json()["decryption_key"]
-    else:
-        print('Error with the server !')
 
     return False

