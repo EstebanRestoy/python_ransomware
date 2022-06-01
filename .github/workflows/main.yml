@@ -22,7 +22,8 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt --upgrade pip
              pip install pylint
-             pip install pytest, pytest-asyncio
+             pip install pytest
+             pip install pytest-asyncio
 
       - name: Analysing the code with pylint
         run: |
