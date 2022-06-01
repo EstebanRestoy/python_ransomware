@@ -52,5 +52,5 @@ def encrypt_file_name(path: str, fernet: object):
     path_to_file, file_name = split(path)
     name, extension = file_name.split(".")
     encrypted_name = fernet.encrypt(name.encode()).decode() + "." + extension
-    rename(path, path_to_file + '\\' + encrypted_name)
+    rename(path, path_to_file + '/' + encrypted_name)
     return encrypted_name

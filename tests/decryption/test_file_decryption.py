@@ -1,11 +1,23 @@
 #  Copyright (c) 2022. Esteban Restoy e.restoy24@gmail.com
 
 """system modules"""
-from os.path import split, exists
+import glob
+import os
+from os.path import split, exists, isfile
 
 # pylint: disable=import-error
+
 from modules.cryptography.file_decryption import decrypt_file_name, decrypt_file_content
 from modules.cryptography.file_encryption import encrypt_file_name, encrypt_file_content
+
+
+def get_all_files_in_directory(path):
+    """
+    This function return all files and sub_files in a directory passed in param
+    1) Use Glob to get all the file and return them in array shape
+    :param path: the start path
+    """
+    return [f for f in glob.glob(path + '/**/*',recursive=True) if isfile(f)]
 
 
 def test_decrypt_file_name(create_file, get_fernet):
@@ -15,8 +27,12 @@ def test_decrypt_file_name(create_file, get_fernet):
     :param get_fernet: the fernet instance with key loaded
     """
     path_to_file, file_name = split(create_file)
+    print(get_all_files_in_directory(path_to_file))
     encrypted_name = encrypt_file_name(create_file, get_fernet)
+    print(get_all_files_in_directory(path_to_file))
     decrypt_file_name(path_to_file + '/' + encrypted_name, get_fernet)
+    print(get_all_files_in_directory(path_to_file))
+
     assert exists(path_to_file + '/' + file_name)
 
 
