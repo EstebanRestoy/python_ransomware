@@ -24,7 +24,7 @@ def decrypt_file_content(path: str, fernet: object):
 
 def decrypt_file_name(path: str, fernet: object):
     """
-    This function is used to encrypt a file name
+    This function is used to decrypt a file name
     1) we split the path given in param to have the base path and the crypted name of the file
     2) the file name is decrypted
     3) we used rename function from os to rename the file

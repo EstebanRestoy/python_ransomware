@@ -2,8 +2,7 @@ name: Configure pyenv and pick the right version
 on: [push, pull_request]
 
 jobs:
- # python installation
-  install-python:
+  build:
   # should run on linux based operating system
     runs-on: ubuntu-latest
 
