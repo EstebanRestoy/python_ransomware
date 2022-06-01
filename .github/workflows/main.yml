@@ -31,7 +31,7 @@ jobs:
 
       - name: Test with pytest
         run: |
-            python -m pytest
+            python -m pytest --threshold 8
 
       - name: setup pyenv
         id: pyenv_installation
