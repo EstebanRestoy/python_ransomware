@@ -2,13 +2,21 @@
 
 """System modules"""
 import sys
+import os
 
 from dotenv import load_dotenv
 
-load_dotenv()
+
+# codes line allow to package env in the exe file
+# BUT they can be find easily without encryption of exe
+
+extDataDir = os.getcwd()
+if getattr(sys, 'frozen', False):
+    extDataDir = sys._MEIPASS
+load_dotenv(dotenv_path=os.path.join(extDataDir, '.env'))
+
 # pylint: disable=wrong-import-position
 # pylint: disable=wrong-import-order
-import os
 import time
 import requests
 from cryptography.fernet import Fernet
