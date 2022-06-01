@@ -1,12 +1,11 @@
 #  Copyright (c) 2022. Esteban Restoy e.restoy24@gmail.com
 
-"""asyncio module for async await"""
-import asyncio
+"""system modules"""
 from os import rename
 from os.path import split
 
 
-async def decrypt_file_content(path: str, fernet: object):
+def decrypt_file_content(path: str, fernet: object):
     """
     This function is used to decrypt the content of a file
     1) Open the file with read binary permission
@@ -16,16 +15,14 @@ async def decrypt_file_content(path: str, fernet: object):
     :param path: The path of the file
     :param fernet: Fernet object loaded with the key used to crypt
     """
-    with open(path, "rb") as file:
-        file_data = file.read()
-
-    decrypted_data = fernet.decrypt(file_data)
-
-    with open(path, "wb") as file:
+    with open(path, "r+b") as file:
+        decrypted_data = fernet.decrypt(file.read())
+        file.seek(0)
         file.write(decrypted_data)
+        file.truncate()
 
 
-async def decrypt_file_name(path: str, fernet: object):
+def decrypt_file_name(path: str, fernet: object):
     """
     This function is used to encrypt a file name
     1) we split the path given in param to have the base path and the crypted name of the file
@@ -36,10 +33,11 @@ async def decrypt_file_name(path: str, fernet: object):
     :param fernet: Fernet object loaded with the key used to crypt
     """
     path_to_file, file_name = split(path)
-    rename(path, path_to_file + '\\' + fernet.decrypt(file_name.encode()).decode())
+    name, extension = file_name.split(".")
+    rename(path, path_to_file + '\\' + fernet.decrypt(name.encode()).decode() + "." + extension)
 
 
-async def decrypt_file(path: str, fernet: object):
+def decrypt_file(path: str, fernet: object):
     """
     This function is used to combine the 2 function above
     1) Call the decrypt file content function
@@ -49,6 +47,7 @@ async def decrypt_file(path: str, fernet: object):
     :param fernet: Fernet object loaded with the key used to crypt
     """
     try:
-        await asyncio.gather(decrypt_file_content(path, fernet), decrypt_file_name(path, fernet))
-    except RuntimeError:
+        decrypt_file_content(path, fernet)
+        decrypt_file_name(path, fernet)
+    except Exception as e:
         print("Error during decrypt file :" + path)

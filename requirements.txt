@@ -3,3 +3,4 @@ cryptography~=37.0.2
 requests~=2.27.1
 python-dotenv~=0.20.0
 PyAutoGUI~=0.9.53
+wcmatch~=8.4

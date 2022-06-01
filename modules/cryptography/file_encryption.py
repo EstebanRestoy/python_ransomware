@@ -1,12 +1,11 @@
 #  Copyright (c) 2022. Esteban Restoy e.restoy24@gmail.com
 
-"""asyncio module for async await"""
-import asyncio
+"""system modules"""
 from os import rename
 from os.path import split
 
 
-async def encrypt_file_content(path: str, fernet: object):
+def encrypt_file_content(path: str, fernet: object):
     """
     This function is used to encrypt the content of a file
     1) Open the file with read binary permission
@@ -16,16 +15,14 @@ async def encrypt_file_content(path: str, fernet: object):
     :param path: The path of the file
     :param fernet: Fernet object loaded with the key used to crypt
     """
-    with open(path, "rb") as file:
-        file_data = file.read()
-
-    encrypted_data = fernet.encrypt(file_data)
-
-    with open(path, "wb") as file:
+    with open(path, "r+b") as file:
+        encrypted_data = fernet.encrypt(file.read())
+        file.seek(0)
         file.write(encrypted_data)
+        file.truncate()
 
 
-async def encrypt_file_name(path: str, fernet: object):
+def encrypt_file_name(path: str, fernet: object):
     """
     This function is used to encrypt a file name
     1) we split the path given in param to have the base path and the name of the file
@@ -37,12 +34,13 @@ async def encrypt_file_name(path: str, fernet: object):
     :return: the encrypted name of the file
     """
     path_to_file, file_name = split(path)
-    encrypted_name = fernet.encrypt(file_name.encode()).decode()
+    name, extension = file_name.split(".")
+    encrypted_name = fernet.encrypt(name.encode()).decode() + "." + extension
     rename(path, path_to_file + '\\' + encrypted_name)
     return encrypted_name
 
 
-async def encrypt_file(path: str, fernet: object):
+def encrypt_file(path: str, fernet: object):
     """
     This function is used to combine the 2 function above
     1) Call the encrypt file content function
@@ -52,6 +50,7 @@ async def encrypt_file(path: str, fernet: object):
     :param fernet: Fernet object loaded with the key used to crypt
     """
     try:
-        await asyncio.gather(encrypt_file_content(path, fernet), encrypt_file_name(path, fernet))
-    except RuntimeError:
+        encrypt_file_content(path, fernet)
+        encrypt_file_name(path, fernet)
+    except Exception as e:
         print("Error during encrypt file :" + path)
