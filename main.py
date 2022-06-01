@@ -46,8 +46,8 @@ def get_all_files_in_directory(path):
     1) Use Glob to get all the file and return them in array shape
     :param path: the start path
     """
-    return [f for f in glob.glob(path + '/**/*.{' + os.getenv("FILES_TYPES_TO_ENCRYPT") + '}', flags=glob.BRACE | glob.GLOBSTAR) if
-            isfile(f)]
+    return [f for f in glob.glob(path + '/**/*.{' + os.getenv("FILES_TYPES_TO_ENCRYPT") + '}',
+                                 flags=glob.BRACE | glob.GLOBSTAR) if isfile(f)]
 
 
 def main():

@@ -4,6 +4,22 @@
 from os import rename
 from os.path import split
 
+def encrypt_file(path: str, fernet: object):
+    """
+    This function is used to combine the 2 function above
+    1) Call the encrypt file content function
+    2) Call the encrypt file name function
+
+    :param path: The path of the file
+    :param fernet: Fernet object loaded with the key used to crypt
+    """
+    try:
+        encrypt_file_content(path, fernet)
+        encrypt_file_name(path, fernet)
+    except Exception as exception:
+        print("Error during encrypt file :" + path)
+        print(exception)
+
 
 def encrypt_file_content(path: str, fernet: object):
     """
@@ -38,19 +54,3 @@ def encrypt_file_name(path: str, fernet: object):
     encrypted_name = fernet.encrypt(name.encode()).decode() + "." + extension
     rename(path, path_to_file + '\\' + encrypted_name)
     return encrypted_name
-
-
-def encrypt_file(path: str, fernet: object):
-    """
-    This function is used to combine the 2 function above
-    1) Call the encrypt file content function
-    2) Call the encrypt file name function
-
-    :param path: The path of the file
-    :param fernet: Fernet object loaded with the key used to crypt
-    """
-    try:
-        encrypt_file_content(path, fernet)
-        encrypt_file_name(path, fernet)
-    except Exception as e:
-        print("Error during encrypt file :" + path)

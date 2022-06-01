@@ -5,6 +5,23 @@ from os import rename
 from os.path import split
 
 
+def decrypt_file(path: str, fernet: object):
+    """
+    This function is used to combine the 2 function above
+    1) Call the decrypt file content function
+    2) Call the decrypt file name function
+
+    :param path: The path of the file
+    :param fernet: Fernet object loaded with the key used to crypt
+    """
+    try:
+        decrypt_file_content(path, fernet)
+        decrypt_file_name(path, fernet)
+    except Exception as exception:
+        print("Error during decrypt file :" + path)
+        print(exception)
+
+
 def decrypt_file_content(path: str, fernet: object):
     """
     This function is used to decrypt the content of a file
@@ -35,19 +52,3 @@ def decrypt_file_name(path: str, fernet: object):
     path_to_file, file_name = split(path)
     name, extension = file_name.split(".")
     rename(path, path_to_file + '\\' + fernet.decrypt(name.encode()).decode() + "." + extension)
-
-
-def decrypt_file(path: str, fernet: object):
-    """
-    This function is used to combine the 2 function above
-    1) Call the decrypt file content function
-    2) Call the decrypt file name function
-
-    :param path: The path of the file
-    :param fernet: Fernet object loaded with the key used to crypt
-    """
-    try:
-        decrypt_file_content(path, fernet)
-        decrypt_file_name(path, fernet)
-    except Exception as e:
-        print("Error during decrypt file :" + path)

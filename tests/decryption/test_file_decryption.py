@@ -16,7 +16,7 @@ def test_decrypt_file_name(create_file, get_fernet):
     """
     path_to_file, file_name = split(create_file)
     encrypted_name = encrypt_file_name(create_file, get_fernet)
-    decrypt_file_name(path_to_file + '\\' + encrypted_name, get_fernet)
+    decrypt_file_name(path_to_file + '/' + encrypted_name, get_fernet)
     assert exists(path_to_file + '/' + file_name)
 
 
