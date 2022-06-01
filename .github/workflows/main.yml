@@ -27,11 +27,11 @@ jobs:
 
       - name: Analysing the code with pylint
         run: |
-          pylint $(git ls-files '*.py')
+          pylint $(git ls-files '*.py') --threshold 8
 
       - name: Test with pytest
         run: |
-            python -m pytest --threshold 8
+            python -m pytest 
 
       - name: setup pyenv
         id: pyenv_installation
