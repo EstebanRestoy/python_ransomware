@@ -20,6 +20,7 @@ def create_config_file(computer_id: int):
     payload = json.dumps({
         "computer_id": computer_id,
         "encrypted": True,
+        "decrypted": False,
         "has_paid": False
     })
 
