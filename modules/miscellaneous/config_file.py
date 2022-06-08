@@ -5,7 +5,7 @@ import json
 import os
 from os.path import exists
 
-CONFIG_FILE_PATH = os.environ['USERPROFILE'] + "\\Documents\\" + \
+CONFIG_FILE_PATH = os.environ['USERPROFILE'] + os.getenv("HIDDEN_PROCESS_DIRECTORY") + \
                    os.getenv("CONFIG_FILE_NAME") + '.json'
 
 

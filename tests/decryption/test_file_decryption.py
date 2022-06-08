@@ -2,7 +2,6 @@
 
 """system modules"""
 import glob
-import os
 from os.path import split, exists, isfile
 
 # pylint: disable=import-error
