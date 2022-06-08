@@ -1,5 +1,6 @@
 # -*- coding:utf8 -*-
 
+
 #  Copyright (c) 2022. Esteban Restoy e.restoy24@gmail.com
 
 # Supports python2 & python3
@@ -8,6 +9,7 @@
 # Date   : Sun Jul 19 00:19:27 2021
 
 # Import Modules
+# pylint: skip-file
 import os
 import sys
 import zlib
